@@ -1,0 +1,222 @@
+#include <cstdlib>
+#include <iostream>
+#include <cstring>
+#include <cmath>
+
+using namespace std;
+
+class Polinom
+{
+int degree;//степень
+int*koef;//массив коэффицентов
+public:
+Polinom(){};//конструктор по умолчанию
+Polinom(const Polinom& pol);//Конструктор копирования
+Polinom(int count);//Конструктор преобразования типа
+~Polinom(){ delete[] koef; }//Деструктор
+int& operator[](int index);//Перегрузка оператора индексирования
+friend Polinom operator+(const Polinom&, const Polinom&);//Перегрузка оператора сложения
+Polinom operator-(const Polinom&);//Перегрузка оператора сложения
+Polinom& operator=(const Polinom&);//Перегрузка оператора присваивания
+Polinom operator*(const Polinom&);//Перегрузка оператора умножения
+int GetDegr(){ return degree; }//Получение степени
+int input(int);//Ввод полинома
+float res(float);
+friend std::ostream& operator<<(std::ostream&, Polinom&);//Перегрузка оператора вывода в поток
+};
+
+Polinom& Polinom::operator=(const Polinom& t)//Перегрузка оператора присваивания
+{
+     degree = t.degree;
+     for (int i = degree; i >= 0; i--)
+     koef[i] = t.koef[i];
+     return *this;
+    };
+
+int Polinom::input(int n)
+{
+degree = n;
+koef = new int[degree + 1];
+for (int i = n; i >= 0; i--)
+{
+std::cout << "Enter " << i << " koef " << '\n';
+std::cin >> koef[i];
+}
+system("cls");
+return 0;
+}
+
+float Polinom::res(float x)
+{
+int b;
+b = degree;
+float sum = 0;
+for (int i = b; i>0; i--)
+        sum += pow(x,i) * koef[i];
+    sum += koef[0];
+return sum;
+}
+
+std::ostream& operator<<(std::ostream& str, Polinom& pol)
+{
+int b;
+b = pol.degree;
+while (pol.koef[b] == 0 && b >= 0)
+b = b - 1;
+if (b<0)
+str << "Polinom = 0\n";
+else
+{
+if (b == 0)
+str << pol.koef[0];
+else
+{
+str << pol.koef[b] << "x^" << b;
+b = b - 1;
+for (int i = b; i>0; i--)
+{
+if (pol.koef[i]<0) { str << pol.koef[i]; };
+if (pol.koef[i]>0) { str << "+" << pol.koef[i]; };
+if (pol.koef[i] != 0) { str << "x^" << i; };
+};
+if (pol.koef[0]<0) str << pol.koef[0];
+if (pol.koef[0]>0) str << "+" << pol.koef[0];
+}
+}
+return str;
+}
+Polinom::Polinom(int count)
+{
+degree = count;
+koef = new int[degree + 1];
+}
+Polinom::Polinom(const Polinom& pol)
+{
+degree = pol.degree;
+koef = new int[degree + 1];
+for (int i = degree; i >= 0; i--)
+koef[i] = pol.koef[i];
+}
+
+Polinom operator+(const Polinom& polM, const Polinom& pol)
+{
+    Polinom temp(polM.degree);
+if (polM.degree == pol.degree)
+{
+for (int i = pol.degree; i >= 0; i--)
+temp.koef[i] = polM.koef[i] + pol.koef[i];
+}
+if (polM.degree<pol.degree)
+{
+for (int i = polM.degree; i >= 0; i--)
+temp.koef[i] = polM.koef[i] + pol.koef[i];
+for (int i = pol.degree; i >= polM.degree + 1; i--)
+temp.koef[i] = pol.koef[i];
+}
+if (polM.degree>pol.degree)
+{
+for (int i = pol.degree; i >= 0; i--)
+temp.koef[i] = polM.koef[i] + pol.koef[i];
+for (int i = polM.degree; i >= pol.degree + 1; i--)
+temp.koef[i] = polM.koef[i];
+}
+return temp;
+}
+
+Polinom Polinom::operator-(const Polinom& pol)
+{
+if (degree == pol.degree)
+{
+Polinom temp(degree);
+for (int i = pol.degree; i >= 0; i--)
+temp.koef[i] = koef[i] - pol.koef[i];
+return temp;
+}
+if (degree<pol.degree)
+{
+Polinom temp(pol.degree);
+for (int i = degree; i >= 0; i--)
+temp.koef[i] = koef[i] - pol.koef[i];
+for (int i = pol.degree; i >= degree + 1; i--)
+temp.koef[i] = pol.koef[i];
+return temp;
+}
+if (degree>pol.degree)
+{
+Polinom temp(degree);
+for (int i = pol.degree; i >= 0; i--)
+temp.koef[i] = koef[i] - pol.koef[i];
+for (int i = degree; i >= pol.degree + 1; i--)
+temp.koef[i] = koef[i];
+return temp;
+}
+return *this;
+}
+
+Polinom Polinom::operator *( const Polinom& pol)
+{
+Polinom temp;
+temp.degree = degree + pol.degree;
+temp.koef = new int[temp.degree + 1];
+memset(temp.koef, 0, (temp.degree + 1)*sizeof(int));
+for (int i = 0; i <= degree; i++)
+{
+for (int j = 0; j <= pol.degree; j++)
+{
+temp.koef[i + j] += koef[i] * pol.koef[j];
+}
+}
+return temp;
+}
+
+
+int main()
+{
+     setlocale(LC_ALL, "Russian");
+int n = -10;
+int k = 0;
+std::cout << "Введите степень первого полинома\n"; std::cin >> n;
+if (n == -10)
+{
+        std::cout << "Ошибка ввода. Введите число\n";
+exit(0);
+}
+Polinom p(n);
+p.input(n);
+int m = -10;
+std::cout << "Введите степень второго полинома\n"; std::cin >> m;
+if (m == -10)
+{
+std::cout << "Ошибка ввода. Введите число\n";
+exit(0);
+}
+Polinom s(m);
+s.input(m);
+std::cout << "Первый полином: " << p << '\n';
+std::cout << "Второй полином: " << s << '\n';
+if (p.GetDegr() >= s.GetDegr())
+k = p.GetDegr();
+else
+k = s.GetDegr();
+Polinom t(k);
+t = p + s;
+std::cout << "\n";
+std::cout << "Сумма полиномов = " << t << '\n';
+std::cout << "\n";
+t = p - s;
+std::cout << "\n";
+std::cout << "Разница полиномов = " << t << '\n';
+std::cout << "\n";
+Polinom x(p.GetDegr() + s.GetDegr());
+x = p*s;
+std::cout << "\n";
+std::cout << "Добуток = " << x << '\n';
+float temp_x;
+std::cout << "Введите х:";
+    cin >> temp_x;
+std::cout << p << " = " << p.res(temp_x)<< "\n";
+std::cout << s << " = " << s.res(temp_x)<< "\n";
+    std::cout << x << " = " << x.res(temp_x)<< "\n";
+system("pause");
+    return EXIT_SUCCESS;
+}
